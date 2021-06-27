@@ -1,0 +1,12 @@
+---
+- name: Verify SSH Port is open on hosts
+  gather_facts: false
+  hosts: pod1
+
+  - name: Wait 10 seconds for port 22 to become open and contain "OpenSSH"
+    wait_for:
+      port: 22
+      host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+      search_regex: OpenSSH
+      delay: 10
+    connection: local

@@ -1,0 +1,32 @@
+---
+- name: Verify Inter vLan routing works
+  gather_facts: false
+  hosts: localhost
+
+  tasks:
+    - name: Check if we can ping a PC in Vlan 10 on the same switch
+      shell: ping -c 1 -w 2 192.168.10.1
+      register: result
+      retries: 10
+      until: ('100% packet loss' not in result.stdout)
+      failed_when: ('100% packet loss' in result.stdout)
+      changed_when: false
+      ignore_errors: true
+
+    - name: Check if we can ping a PC in Vlan 20 another switch
+      shell: ping -c 1 -w 2 192.168.20.1
+      register: result
+      retries: 10
+      until: ('100% packet loss' not in result.stdout)
+      failed_when: ('100% packet loss' in result.stdout)
+      changed_when: false
+      ignore_errors: true
+
+    - name: Check if we can ping a PC in Vlan 100 another switch
+      shell: ping -c 1 -w 2 192.168.100.1
+      register: result
+      retries: 10
+      until: ('100% packet loss' not in result.stdout)
+      failed_when: ('100% packet loss' in result.stdout)
+      changed_when: false
+      ignore_errors: true
