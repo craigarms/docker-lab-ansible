@@ -2,6 +2,10 @@
 - name: Configure the IP on the Ansible Docker container
   gather_facts: false
   hosts: localhost
+  vars:
+    ip: "192.168.{{ lookup('env','VLAN') | default('1', true) }}.{{ lookup('env','HOST') | default('1', true) }}"
+    gateway: "192.168.{{ lookup('env','VLAN') | default('1', true) }}.254"
+
 
   tasks:
     - name: Check If Configured
@@ -9,9 +13,9 @@
       register: ipconfig_check1
 
     - name: Configure IP
-      shell: ip address add 192.168.{{ lookup('env','VLAN') | default('1') }}.{{ lookup('env','HOST') | default('1') }}/24 dev eth0
+      shell: ip address add {{ ip }}/24 dev eth0
       when:
-        - '"192.168.{{ lookup('env','VLAN') | default('1') }}.{{ lookup('env','HOST') | default('1') }}" not in ipconfig_check1.stdout'
+        - ip not in ipconfig_check1.stdout
 
     - name: Check IP Config
       shell: ip address show dev eth0
@@ -20,16 +24,16 @@
     - name: Assert that IP is configured
       assert:
         that:
-          - '"192.168.{{ lookup('env','VLAN') | default('1') }}.{{ lookup('env','HOST') | default('1') }}" in ipconfig.stdout'
+          - ip in ipconfig.stdout
 
     - name: Check Route Configured
       shell: ip route
       register: iproute_check1
 
     - name: Configure Gateway
-      shell: ip route add default via 192.168.{{ lookup('env','VLAN') | default('1') }}.254
+      shell: ip route add default via {{ gateway }}
       when:
-        - '"default via 192.168.{{ lookup('env','VLAN') | default('1') }}.254" not in iproute_check1.stdout'
+        - {{ gateway }} not in iproute_check1.stdout
 
     - name: Check Routing configuration
       shell: ip route
@@ -38,4 +42,4 @@
     - name: Assert that gateway is configured
       assert:
         that:
-          - '"default via 192.168.{{ lookup('env','VLAN') | default('1') }}.254" in iproute.stdout'
+          - gateway in iproute.stdout
