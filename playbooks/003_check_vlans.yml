@@ -1,0 +1,17 @@
+---
+- name: Verify vLan communication works
+  gather_facts: false
+  hosts: localhost
+  vars:
+    neighbor: 192.168.{{ lookup('env','VLAN') | default('1', true) }}.2
+
+  tasks:
+    - name: Check if we can ping a PC in the same VLAN
+      shell: ping -c 1 -w 2 {{ neighbor }}
+      register: result
+      retries: 10
+      until: ('100% packet loss' not in result.stdout)
+      failed_when: ('100% packet loss' in result.stdout)
+      changed_when: false
+      ignore_errors: true
+
