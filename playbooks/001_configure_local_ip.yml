@@ -33,7 +33,7 @@
     - name: Configure Gateway
       shell: ip route add default via {{ gateway }}
       when:
-        - {{ gateway }} not in iproute_check1.stdout
+        - gateway not in iproute_check1.stdout
 
     - name: Check Routing configuration
       shell: ip route
